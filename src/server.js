@@ -1,5 +1,7 @@
 const express = require('express')
 const mysql = require('mysql')
+const dotenv = require('dotenv')
+dotenv.config({path:'../.env' })
 const jwt = require('jsonwebtoken')
 const app = express()
 const cors = require('cors')
@@ -28,7 +30,7 @@ const protectedRoute = express.Router();
 protectedRoute.use((req, res, next) => {
     const token = req.header('access-token');
     if(token){
-        jwt.verify(token, 'ShVmYq3t6w9z$C&F)J@NcRfTjWnZr4u7', (err, decoded) => {
+        jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
             if(err){
                 return res.json({message: 'Invalid token'})
             }
@@ -78,13 +80,13 @@ app.post('/login', (req, res) => {
             throw err;
         }
         // Check if the user (email) exists
-        if(results){
+        if(results[0]){
             // Check if the password is equal to the password in database
             if (password === results[0].password){
                 res.json({
                     status: 'OK',
                     message: 'Authenticated',
-                    token: jwt.sign({userId: results.user_id}, 'ShVmYq3t6w9z$C&F)J@NcRfTjWnZr4u7', {expiresIn: 20160})
+                    token: jwt.sign({userId: results[0].id}, process.env.JWT_KEY, {expiresIn: 20160})
                 })
             }
             else{

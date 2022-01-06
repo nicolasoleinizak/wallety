@@ -1,7 +1,7 @@
 const express = require('express')
 const mysql = require('mysql')
 const dotenv = require('dotenv')
-dotenv.config({path:'../.env' })
+dotenv.config()
 const jwt = require('jsonwebtoken')
 const app = express()
 const cors = require('cors')
@@ -30,7 +30,7 @@ const protectedRoute = express.Router();
 protectedRoute.use((req, res, next) => {
     const token = req.header('access-token');
     if(token){
-        jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
+        jwt.verify(token, '12341234', (err, decoded) => {
             if(err){
                 return res.json({message: 'Invalid token'})
             }
@@ -86,7 +86,7 @@ app.post('/login', (req, res) => {
                 res.json({
                     status: 'OK',
                     message: 'Authenticated',
-                    token: jwt.sign({userId: results[0].id}, process.env.JWT_KEY, {expiresIn: 20160})
+                    token: jwt.sign({userId: results[0].id}, '12341234', {expiresIn: 20160})
                 })
             }
             else{
@@ -118,7 +118,6 @@ app.get('/get_records', protectedRoute, (req, res) => {
             })
         }
     })
-
 })
 
 app.post('/create_record', protectedRoute, (req, res) => {
@@ -131,6 +130,7 @@ app.post('/create_record', protectedRoute, (req, res) => {
         }
         else{
             res.json({
+                status: 'HTTP1.0 200 OK',
                 newOrderId: results.insertId
             })
         }
@@ -146,19 +146,18 @@ app.post('/update_records', protectedRoute, (req, res) => {
         let inserts = ['records', 'subject', record.subject, 'date', record.date, 'amount', record.amount, 'id', record.id, 'user_id', userId];
         pool.query(mysql.format(sql, inserts), (err, results, fields) => {
             if(err){
+                console.log("err")
                 res.json({
                     status: 'HTTP1.0 500 Internal Server Error',
                     message: 'An error occurred while database accessing'
                 })
             }
-            else{
-                res.json({
-                    status: 'HTTP1.0 200 OK',
-                    message: 'The data was successfully updated'
-                })
-            }
         })
     }
+    res.json({
+        status: 'HTTP1.0 200 OK',
+        message: 'The data was successfully updated'
+    })
 })
 
 app.delete('/delete_record', protectedRoute, (req, res) => {
@@ -179,5 +178,5 @@ app.delete('/delete_record', protectedRoute, (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+    console.log(`App listening at http://localhost:${port}`);
   })

@@ -157,7 +157,6 @@ class Main extends React.Component{
     })
     .then(response => {
       if(response.status === 200){
-        
         this.setState((prevState) => {
           return {
             records: prevState.records.slice(0, index).concat(prevState.records.slice(index+1))
@@ -230,6 +229,7 @@ class Main extends React.Component{
           this.downloadRecords()
       }
   }
+  
   render(){
     return(
       <div id="main">

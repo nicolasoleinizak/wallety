@@ -30,8 +30,8 @@ class Login extends React.Component{
         return(
             <div id="login">
                 <form>
-                    <input type="email" name="email" value={this.state.emailInput} onChange={this.handleInputChange} placeholder="Enter your email"/>
-                    <input type="password" name="password" value={this.state.emailInput} onChange={this.handleInputChange} placeholder="Enter your password"/>
+                    <input type="email" name="email" value={this.state.email} onChange={this.handleInputChange} placeholder="Enter your email"/>
+                    <input type="password" name="password" value={this.state.password} onChange={this.handleInputChange} placeholder="Enter your password"/>
                     <input type="button" onClick={this.login} value="Login" />
                 </form>
             </div>

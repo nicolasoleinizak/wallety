@@ -43,6 +43,7 @@ class App extends React.Component{
   }
 
   componentDidMount(){
+    console.log("mount app")
     if(localStorage.accessToken){
       this.setState({
         accessToken: localStorage.accessToken
@@ -52,13 +53,18 @@ class App extends React.Component{
         })
       })
     }
+    else{
+      this.setState({
+        view: 'Login'
+      })
+    }
   }
 
   render(){
     let view = () => {
       switch(this.state.view){
         case 'Login':
-          return <Login login={this.login}/>
+          return <Login onLogin={this.login}/>
         case 'Main':
           return <Main accessToken={this.state.accessToken}/>
       } 

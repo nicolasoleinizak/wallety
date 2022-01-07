@@ -121,11 +121,8 @@ class Main extends React.Component{
         })
       }
     }, () => {
-      this.updateBalance()
       this.closeNew()
-      console.log("1: "+(this.state.totalIncome - this.state.totalExpense))
-      this.forceUpdate()
-      console.log("2: "+(this.state.totalIncome - this.state.totalExpense))
+      this.updateBalance()
     })
   }
   

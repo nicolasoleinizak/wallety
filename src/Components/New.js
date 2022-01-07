@@ -14,7 +14,7 @@ class New extends React.Component{
     create(){
         this.props.uploadNewRecord(
             this.type.current.value,
-            this.dateString.current.value,
+            new Date(this.dateString.current.value).toUTCString(),
             this.subject.current.value,
             this.amount.current.value
         )
@@ -24,6 +24,10 @@ class New extends React.Component{
         this.dateString.current.value = this.props.timestampToString(new Date());
         this.subject.current.value = '';
         this.amount.current.value = 0;
+    }
+
+    componentDidMount(){
+        this.reset()
     }
 
     render(){

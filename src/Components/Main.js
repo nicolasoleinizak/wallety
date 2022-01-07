@@ -7,6 +7,8 @@ class Main extends React.Component{
       super(props)
       this.state = {
           records: [],
+          totalIncome: 0,
+          totalExpense: 0,
           optionsMenu: 'closed',
           showNew: false,
           showEditor: false,
@@ -24,6 +26,8 @@ class Main extends React.Component{
       this.new = React.createRef();
       this.openNew = this.openNew.bind(this);
       this.closeNew = this.closeNew.bind(this);
+      this.amountSum = this.amountSum.bind(this);
+      this.updateBalance = this.updateBalance.bind(this);
   }
   save(dateString, subject, amount){
     let index = this.state.editedRecordIndex;
@@ -40,27 +44,30 @@ class Main extends React.Component{
       }
     }, () => {
       this.updateRecords()
+      this.updateBalance()
     })
   }
   async downloadRecords(){
-      let headers = new Headers({
-        'access-token': this.props.accessToken
-      })
-      fetch('http://localhost:3001/get_records', {
-        method: 'GET',
-        headers: headers
-      })
-      .then((response) => {
-        console.log(response)
-        response.json().then(jsonData => {
-          console.log(jsonData)
-          this.setState({
-            records: jsonData.data
-          })
+    let headers = new Headers({
+      'access-token': this.props.accessToken
+    })
+    fetch('http://localhost:3001/get_records', {
+      method: 'GET',
+      headers: headers
+    })
+    .then((response) => {
+      console.log(response)
+      response.json().then(jsonData => {
+        console.log(jsonData)
+        this.setState({
+          records: jsonData.data,
+        }, () => {
+          this.updateBalance()
         })
       })
-      .catch(err => console.log(err))
-    }
+    })
+    .catch(err => console.log(err))
+  }
 
   async uploadNewRecord(type, dateString, subject, amount){
     let headers = new Headers({
@@ -72,7 +79,7 @@ class Main extends React.Component{
       headers: headers,
       body: JSON.stringify({
         type: type,
-        date: new Date(dateString) / 1000,
+        date: this.stringToTimestamp(dateString) / 1000,
         subject: subject,
         amount: amount
       })
@@ -84,12 +91,12 @@ class Main extends React.Component{
           let newOrder = {
             id: jsonResponse.newOrderId,
             type: type,
-            date: new Date(dateString).getTime(),
+            date: this.stringToTimestamp(dateString) / 1000,
             subject: subject,
             amount: amount
           }
-          console.log(newOrder);
-          this.createNewRecord(newOrder)
+          console.log(newOrder)
+          this.createNewRecord(newOrder);
         }
         else{
           console.log(jsonResponse);
@@ -106,15 +113,19 @@ class Main extends React.Component{
     this.setState(prevState => {
       return{
         records: prevState.records.concat({
-          id,
-          type,
-          date: this.timestampToString(date),
-          subject,
-          amount
+          id: id,
+          type: type,
+          date: date,
+          subject: subject,
+          amount: amount
         })
       }
     }, () => {
+      this.updateBalance()
       this.closeNew()
+      console.log("1: "+(this.state.totalIncome - this.state.totalExpense))
+      this.forceUpdate()
+      console.log("2: "+(this.state.totalIncome - this.state.totalExpense))
     })
   }
   
@@ -161,6 +172,8 @@ class Main extends React.Component{
           return {
             records: prevState.records.slice(0, index).concat(prevState.records.slice(index+1))
           }
+        }, () => {
+          this.updateBalance()
         })
       }
       response.json().then(jsonResponse => {
@@ -221,15 +234,39 @@ class Main extends React.Component{
   stringToTimestamp(dateString){
     return new Date(dateString).valueOf()
   }
-  
-  componentDidMount(){
-    console.log("mounted main")
-    console.log(this.state.showEditor)
-      if(this.props.accessToken){
-          this.downloadRecords()
-      }
+
+  amountSum(type){
+    if(this.state.records.length > 0){
+      return this.state.records.reduce((sum, record) => {
+        if(record.type == type){
+          return sum + parseInt(record.amount)
+        }
+        else {
+          return sum
+        }
+      }, 0)
+    }
+    else{
+      return 0
+    }
   }
   
+  componentDidMount(){
+    if(this.props.accessToken){
+        this.downloadRecords()
+    }
+  }
+    
+  updateBalance(){
+    console.log("update balance")
+    this.setState({
+      totalIncome: this.amountSum(1),
+      totalExpense: this.amountSum(0)
+    }, () => {
+      console.log(this.state.totalIncome - this.state.totalExpense)
+    })
+  }
+
   render(){
     return(
       <div id="main">
@@ -251,6 +288,7 @@ class Main extends React.Component{
                 </nav>
               </header>
               <div className="content">
+                <div id="balance" className={`${this.state.totalIncome-this.state.totalExpense < 0? 'negative':'positive'}-balance`}>Current balance: ${this.state.totalIncome - this.state.totalExpense}</div>
                 <div className="records-list">
                     <h2>Records</h2>
                     {

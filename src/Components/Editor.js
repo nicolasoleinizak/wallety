@@ -51,18 +51,12 @@ class Editor extends React.Component{
         })
     }
 
-    componentDidMount(){
-        console.log("props"+JSON.stringify(this.props))
-    }
-
-
-
     render(){
         return(
-            <div id="editor" className="pop-editor" style={this.props.showEditor === true? {}:{display: 'none'}}>
-            <p>{this.props.showEditor}</p>
+            <div id="editor" className="pop-editor" style={this.props.showEditor === true? {}:{display: 'none'}}>+
             {this.props.showEditor &&
                 <div id="editor-container" className="pop-editor-container">
+                    <h2>Edit record</h2>
                     <p>{this.getRecordTypeName(this.props.record.type)}</p>
                     <label>Date: <input type="date" ref={this.dateString} name="dateString" value={this.state.dateString} onChange={this.handleChange}/></label>
                     <label>Subject: <input type="text" ref={this.subject} name="subject" value={this.state.subject} onChange={this.handleChange}/></label>

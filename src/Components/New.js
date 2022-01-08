@@ -7,8 +7,8 @@ class New extends React.Component{
         this.dateString = React.createRef();
         this.subject = React.createRef();
         this.amount = React.createRef();
-        this.create = this.create.bind(this)
-        this.reset = this.reset.bind(this)
+        this.create = this.create.bind(this);
+        this.reset = this.reset.bind(this);
     }
 
     create(){
@@ -40,7 +40,7 @@ class New extends React.Component{
                             <option value="1">Income</option>
                             <option value="0">Expense</option>
                         </select>
-                        <label>Date: <input type="date" ref={this.dateString}/></label>
+                        <label>Date: <input type="date" ref={this.dateString} defaultValue={this.props.timestampToString(new Date())}/></label>
                         <label>Subject: <input type="text" ref={this.subject}/></label>
                         <label>Amount: <input type="number" ref={this.amount}/></label>
                         <input type="button" onClick={this.create} value="Create"/>

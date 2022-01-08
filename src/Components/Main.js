@@ -1,33 +1,35 @@
 import React from "react";
 import Editor from './Editor.js'
 import New from './New.js'
+import Home from './Home.js'
+import List from './List.js'
 
 class Main extends React.Component{
   constructor(props){
       super(props)
       this.state = {
           records: [],
-          totalIncome: 0,
-          totalExpense: 0,
           optionsMenu: 'closed',
           showNew: false,
           showEditor: false,
-          editedRecordIndex: 0
+          editedRecordIndex: 0,
+          itemsdisplayed: 10,
+          view: 'Home'
       }
       this.editor = React.createRef()
       this.downloadRecords = this.downloadRecords.bind(this);
       this.updateRecords = this.updateRecords.bind(this);
       this.uploadNewRecord = this.uploadNewRecord.bind(this);
+      this.deleteRecord = this.deleteRecord.bind(this);
       this.openOptionsMenu = this.openOptionsMenu.bind(this);
       this.closeOptionsMenu = this.closeOptionsMenu.bind(this);
       this.save = this.save.bind(this);
       this.editor = React.createRef();
+      this.openEditor = this.openEditor.bind(this);
       this.closeEditor = this.closeEditor.bind(this);
       this.new = React.createRef();
       this.openNew = this.openNew.bind(this);
       this.closeNew = this.closeNew.bind(this);
-      this.amountSum = this.amountSum.bind(this);
-      this.updateBalance = this.updateBalance.bind(this);
   }
   save(dateString, subject, amount){
     let index = this.state.editedRecordIndex;
@@ -44,7 +46,6 @@ class Main extends React.Component{
       }
     }, () => {
       this.updateRecords()
-      this.updateBalance()
     })
   }
   async downloadRecords(){
@@ -57,13 +58,16 @@ class Main extends React.Component{
     })
     .then((response) => {
       console.log(response)
-      response.json().then(jsonData => {
-        console.log(jsonData)
-        this.setState({
-          records: jsonData.data,
-        }, () => {
-          this.updateBalance()
-        })
+      response.json().then(jsonResults => {
+        console.log(jsonResults)
+        if(jsonResults.status === 'HTTP1.0 200 OK'){
+          this.setState({
+            records: jsonResults.data,
+          })
+        }
+        else if(jsonResults.message === 'Invalid token'){
+          this.props.logout()
+        }
       })
     })
     .catch(err => console.log(err))
@@ -122,7 +126,6 @@ class Main extends React.Component{
       }
     }, () => {
       this.closeNew()
-      this.updateBalance()
     })
   }
   
@@ -167,10 +170,10 @@ class Main extends React.Component{
       if(response.status === 200){
         this.setState((prevState) => {
           return {
-            records: prevState.records.slice(0, index).concat(prevState.records.slice(index+1))
+            records: prevState.records.filter( record => {
+              return record.id != id;
+            })
           }
-        }, () => {
-          this.updateBalance()
         })
       }
       response.json().then(jsonResponse => {
@@ -191,7 +194,10 @@ class Main extends React.Component{
     })
   }
   
-  openEditor(index){
+  openEditor(id){
+    let index = this.state.records.findIndex( record => {
+      return record.id === id;
+    })
     this.setState({
       editedRecordIndex: index,
       showEditor: true
@@ -220,32 +226,27 @@ class Main extends React.Component{
     })
   }
 
-  timestampToString(msTimestamp){
+  timestampToString(msTimestamp, format = 0){
     let date = new Date(msTimestamp);
     let year = date.getUTCFullYear()
     let month = ("0" + (date.getUTCMonth()+1)).slice(-2);
     let day = ("0" + (date.getUTCDate())).slice(-2);
-    return year + "-" + month + "-" + day;
+    if(format == 0){
+      return year + "-" + month + "-" + day;
+    }
+    else if(format == 1){
+      return day + "-" + month + "-" + year;
+    }
   }
-  
+
   stringToTimestamp(dateString){
     return new Date(dateString).valueOf()
   }
 
-  amountSum(type){
-    if(this.state.records.length > 0){
-      return this.state.records.reduce((sum, record) => {
-        if(record.type == type){
-          return sum + parseInt(record.amount)
-        }
-        else {
-          return sum
-        }
-      }, 0)
-    }
-    else{
-      return 0
-    }
+  selectView(view){
+    this.setState({
+      view: view
+    })
   }
   
   componentDidMount(){
@@ -253,59 +254,48 @@ class Main extends React.Component{
         this.downloadRecords()
     }
   }
-    
-  updateBalance(){
-    console.log("update balance")
-    this.setState({
-      totalIncome: this.amountSum(1),
-      totalExpense: this.amountSum(0)
-    }, () => {
-      console.log(this.state.totalIncome - this.state.totalExpense)
-    })
-  }
-
+  
   render(){
+    
+    let view = () => {
+      switch(this.state.view){
+        case 'Home':
+          return(
+            <Home records={this.state.records} itemsDisplayed={this.state.itemsdisplayed} totalIncome={this.state.totalIncome} totalExpense={this.state.totalExpense} timestampToString={this.timestampToString} onEdit={this.openEditor} onDelete={this.deleteRecord}/>
+          )
+          break;
+        case 'List':
+          return(
+            <List records={this.state.records} timestampToString={this.timestampToString} onEdit={this.openEditor} onDelete={this.deleteRecord}/>
+          )
+      }
+    }
+
     return(
       <div id="main">
-              <header>
-                  <h1>Presupuesto</h1>
-                <nav id="main-menu">
-                    <ul>
-                        <li><a className="image-button"><img src="./assets/img/icons/casa.png" alt="home"/></a></li>
-                        <li><a className="image-button"><img src="./assets/img/icons/portapapeles.png" alt="records"/></a></li>
-                        <li><a className="image-button" onClick={this.openNew}><img src="./assets/img/icons/mas.png" alt="new record"/></a></li>
-                        <li><a className="image-button" onClick={this.openOptionsMenu}><img src="./assets/img/icons/settings.png" alt="options"/></a></li>
-                    </ul>
-                </nav>
-                <nav style={this.state.optionsMenu === 'closed'? {display: 'none'}:{}}>
-                  <ul id="options-menu">
-                    <li><a href="#" className="a-button block">Logout</a></li>
-                    <li><a href="#" className="a-button block" onClick={this.closeOptionsMenu}>Close menu</a></li>
-                  </ul>
-                </nav>
-              </header>
-              <div className="content">
-                <div id="balance" className={`${this.state.totalIncome-this.state.totalExpense < 0? 'negative':'positive'}-balance`}>Current balance: ${this.state.totalIncome - this.state.totalExpense}</div>
-                <div className="records-list">
-                    <h2>Records</h2>
-                    {
-                        this.state.records.map( (record, index) => {
-                            return(
-                                <div className={`record record-type-${record.type}`} key={`record-id-${record.id}`}>
-                                    <input type="date" value={this.timestampToString(record.date * 1000)} readOnly/>
-                                    <div>{record.subject}</div>
-                                    <div>{record.amount}</div>
-                                    <a href="#" className="image-button" onClick={() => {this.openEditor(index)}}><img src="assets/img/icons/editar.png" alt="edit"/></a>
-                                    <a href="#" className="image-button" onClick={() => {this.deleteRecord(record.id, index)}}><img src="./assets/img/icons/remove.png" alt="remove"/></a>
-                                </div>
-                            )
-                        })
-                    }
-                </div>
-                <Editor ref={this.editor} timestampToString={this.timestampToString} showEditor={this.state.showEditor} record={this.state.records[this.state.editedRecordIndex]} onSave={this.save} onCloseEditor={this.closeEditor} timestampToString={this.timestampToString}/>
-                <New ref={this.new} showNew={this.state.showNew} stringToTimestamp={this.stringToTimestamp} timestampToString={this.timestampToString} uploadNewRecord={this.uploadNewRecord} onClose={this.closeNew}/>
-              </div>
-          </div>
+        <header>
+          <h1 id="site-name">Wallety</h1>
+          <nav id="main-menu">
+              <ul>
+                  <li><a className="image-button" onClick={() => {this.selectView('Home')}}><img src="./assets/img/icons/casa.png" alt="home"/></a></li>
+                  <li><a className="image-button" onClick={() => {this.selectView('List')}}><img src="./assets/img/icons/portapapeles.png" alt="records"/></a></li>
+                  <li><a className="image-button" onClick={this.openNew}><img src="./assets/img/icons/mas.png" alt="new record"/></a></li>
+                  <li><a className="image-button" onClick={this.openOptionsMenu}><img src="./assets/img/icons/settings.png" alt="options"/></a></li>
+              </ul>
+          </nav>
+          <nav style={this.state.optionsMenu === 'closed'? {display: 'none'}:{}}>
+            <ul id="options-menu">
+              <li><a href="#" className="a-button block" onClick={this.props.logout}>Logout</a></li>
+              <li><a href="#" className="a-button block" onClick={this.closeOptionsMenu}>x</a></li>
+            </ul>
+          </nav>
+        </header>
+        {
+          view()
+        }
+        <Editor ref={this.editor} timestampToString={this.timestampToString} showEditor={this.state.showEditor} record={this.state.records[this.state.editedRecordIndex]} onSave={this.save} onCloseEditor={this.closeEditor} timestampToString={this.timestampToString}/>
+        <New ref={this.new} showNew={this.state.showNew} stringToTimestamp={this.stringToTimestamp} timestampToString={this.timestampToString} uploadNewRecord={this.uploadNewRecord} onClose={this.closeNew}/>
+        </div>
       )
   }
 }

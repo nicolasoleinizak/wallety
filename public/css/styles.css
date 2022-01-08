@@ -1,14 +1,30 @@
+/* Title font */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+/* Body font */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200&display=swap');
+
+
 :root{
     --color1: #b6c1cd;
     --color2: #a1d7d3;
     --color3: #cbe2ac;
     --color4: #e4ad6a;
     --color5: #f36874;
+    --font-color: #242424;
+}
+body{
+    font-family: 'Manrope', sans-serif; 
 }
 header{
     background-color: var(--color2);
     padding: 20px;
     box-sizing: border-box;
+    border-bottom: solid 3px black;
+}
+#site-name{
+    font-family: 'Fredoka One', cursive;
+    font-size: 3rem;
 }
 h1{
     display: block;
@@ -22,10 +38,10 @@ li{
 #app{
     width: 100%;
     height: 100vw;
-    background-color: var(--color1);
+    color: var(--font-color);
 }
 .content{
-    padding: 10%;
+    padding: 40px 20px;
     box-sizing: border-box;
 }
 #main-menu > ul{
@@ -33,21 +49,42 @@ li{
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
+    padding: 0;
 }
 .record{
     display: grid;
     grid-template-columns: 3fr 4fr 2fr 1fr 1fr;
     grid-gap: 10px;
+    align-items: center;
+    border-bottom: solid 2px var(--color1);
+
 }
 .record-type-0{
     color: red;
 }
-input{
-    margin: 5px 0;
-    padding: 5px;
+.records-header{
+    display: grid;
+    grid-template-columns: 3fr 4fr 2fr 2fr;
+    grid-gap: 10px;
+    border-bottom: solid 2px var(--color1);
+    font-weight: 800;
+    align-items: center;
+}
+.records-header span{
+    padding: 10px;
+    box-sizing: border-box;
+}
+input, select{
+    width: 100%;
+    margin: 10px 0 5px 0;
+    padding: 10px;
     box-sizing: border-box;
     border-radius: 5px;
     border: none;
+    text-align: center;
+}
+input[type="text"], input[type="password"], input[type="email"]{
+    border: 2px solid rgb(100,100,100);
 }
 input[type="button"]{
     background-color: var(--color5);
@@ -55,6 +92,37 @@ input[type="button"]{
 input[type="button"]:hover{
     outline: solid 2px black;
 }
+label{
+    width: 100%;
+}
+.radio-group{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    text-align: center;
+    border: 3px solid var(--color2);
+}
+.radio-group input[type="radio"]{
+    display: none;
+}
+.radio-group .checked-label{
+    background-color: var(--color2);
+}
+.radio-group label{
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: white;
+}
+.radio-group label:hover{
+    cursor: pointer;
+}
+.radio-group {
+    background-color: var(--color2);
+}
+input[type="radio"]{
+    margin: 0 5px 0 10px;
+}
+
 .a-button{
     display: inline-block;
     padding: 5px;
@@ -86,12 +154,76 @@ input[type="button"]:hover{
     height: auto;
 }
 
+#access{
+    width: 100%;
+    height: 100vh;
+    background-color: var(--color2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#access-container{
+    width: 90%;
+    max-width: 600px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 0 20px 10px rgba(0,0,0,0.25);
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.message-box{
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.message-alert{
+    background-color: #dd9ea5;
+    border: solid 2px #c1717a;
+}
+
+.message-informative{
+    background-color: #83d789;
+    border: solid 2px #66c76d;
+}
+
+.message-null{
+    display: none;
+}
+
 #options-menu{
     width: 100%;
     padding: 10px 5px 10px 5px;
     box-sizing: border-box;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+#balance{
+    width: 100%;
+    padding: 5%;
+    box-sizing: border-box;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 1.3rem;
+}
+
+#balance-amount{
+    font-size: 1.9rem;
+}
+
+.positive-balance{
+    border: 3px solid #6ad96a;
+}
+.negative-balance{
+    border: 3px solid #ff8585;
 }
 
 .pop-editor{

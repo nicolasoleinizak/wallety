@@ -1,17 +1,20 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 
-import Login from './Components/Login';
+import Access from './Components/Access';
 import Main from './Components/Main';
 
 class App extends React.Component{
   constructor(props){
-    super(props)
+    super(props);
     this.state = {
       accessToken: '',
       view: 'Login'
     }
-    this.login = this.login.bind(this)
+    this.login = this.login.bind(this);
+    this.logout = this.logout.bind(this);
+    this.register = this.register.bind(this);
+    this.access = React.createRef();
   }
 
   login(email, password){
@@ -28,12 +31,15 @@ class App extends React.Component{
     })
     .then((response) => {
       response.json().then((jsonResponse) => {
-        if(response.status === 200){
+        if(jsonResponse.status === 'OK'){
           this.setState({
             accessToken: jsonResponse.token,
             view: 'Main'
           })
           localStorage.accessToken = jsonResponse.token
+        }
+        else{
+          this.access.current.message(jsonResponse.message, 'alert');
         }
       })
     })
@@ -42,8 +48,40 @@ class App extends React.Component{
     })
   }
 
+  logout(){
+    localStorage.removeItem('accessToken');
+    this.setState({
+      accessToken: '',
+      view: 'Login'
+    })
+  }
+
+  register(email, password){
+    let headers = new Headers({
+      'Content-Type': 'application/json'
+    })
+    fetch('http://localhost:3001/register', {
+      method: 'post',
+      headers: headers,
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    })
+    .then(response => {
+      response.json().then(jsonResponse => {
+        if(jsonResponse.status === 'HTTP1.0 200 OK'){
+          this.access.current.message('User successfully registered. Now you can log in.', 'informative');
+          this.access.current.changeForm('login');
+        }
+        else{
+          this.access.current.message(jsonResponse.message, 'alert');
+        }
+      })
+    })
+  }
+
   componentDidMount(){
-    console.log("mount app")
     if(localStorage.accessToken){
       this.setState({
         accessToken: localStorage.accessToken
@@ -64,9 +102,9 @@ class App extends React.Component{
     let view = () => {
       switch(this.state.view){
         case 'Login':
-          return <Login onLogin={this.login}/>
+          return <Access ref={this.access} onLogin={this.login} onRegister={this.register}/>
         case 'Main':
-          return <Main accessToken={this.state.accessToken}/>
+          return <Main accessToken={this.state.accessToken} logout={this.logout}/>
       } 
     }
 

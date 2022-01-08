@@ -52,22 +52,29 @@ app.post('/register', (req, res) => {
 
     // Only two fields requested: email and password
     let email = req.body.email;
-    let passwords = req.body.passwords;
+    let password = req.body.password;
 
     // Looks if there is not another register in the database with the same email address (already existing user)
     pool.query(mysql.format("SELECT * FROM ?? WHERE ?? = ?", ['users', 'email', email]), (err, results, fields) => {
-        if(fields.fieldsCount > 0){
-            connection.query(mysql.format("INSERT INTO users (??, ??) VALUES (?, ?)", ['email', 'password', email, password]), (err, results, fields) => {
+        if(results.length == 0){
+            pool.query(mysql.format("INSERT INTO users (??, ??) VALUES (?, ?)", ['email', 'password', email, password]), (err, results, fields) => {
                 if(err){
-                    res.send(err);
+                    res.json({
+                        message: err
+                    });
                 }
                 else{
-                    res.send(results);
+                    res.json({
+                        status: 'HTTP1.0 200 OK',
+                        message: 'User successfully registered'
+                    })
                 }
             })
         }
         else{
-            res.send('The email is already registered');
+            res.json({
+                message: 'The email is already registered'
+            });
         }
     })
 })
@@ -86,15 +93,21 @@ app.post('/login', (req, res) => {
                 res.json({
                     status: 'OK',
                     message: 'Authenticated',
-                    token: jwt.sign({userId: results[0].id}, '12341234', {expiresIn: 20160})
+                    token: jwt.sign({userId: results[0].id}, '12341234', {expiresIn: 201600})
                 })
             }
             else{
-                res.send("The password is not correct");
+                res.json({
+                    status: 'ERROR',
+                    message: "The password is not correct"
+                });
             }
         }
         else{
-            res.send("The user doesn't exists");
+            res.json({
+                status: 'ERROR',
+                message: "The user doesn't exists"
+            });
         }
     })
 })

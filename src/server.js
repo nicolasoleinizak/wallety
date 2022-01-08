@@ -14,8 +14,10 @@ const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'presupuesto'
+    database: 'wallety'
   });
+
+const jwtKey = 'qpaksm123_12ad*ad?'
 
 // Allow the frontend server to access server throught cors
 app.use(cors({
@@ -30,7 +32,7 @@ const protectedRoute = express.Router();
 protectedRoute.use((req, res, next) => {
     const token = req.header('access-token');
     if(token){
-        jwt.verify(token, '12341234', (err, decoded) => {
+        jwt.verify(token, jwtKey, (err, decoded) => {
             if(err){
                 return res.json({message: 'Invalid token'})
             }
@@ -93,7 +95,7 @@ app.post('/login', (req, res) => {
                 res.json({
                     status: 'OK',
                     message: 'Authenticated',
-                    token: jwt.sign({userId: results[0].id}, '12341234', {expiresIn: 201600})
+                    token: jwt.sign({userId: results[0].id}, jwtKey, {expiresIn: 201600})
                 })
             }
             else{

@@ -57,9 +57,7 @@ class Main extends React.Component{
       headers: headers
     })
     .then((response) => {
-      console.log(response)
       response.json().then(jsonResults => {
-        console.log(jsonResults)
         if(jsonResults.status === 'HTTP1.0 200 OK'){
           this.setState({
             records: jsonResults.data,
@@ -91,7 +89,6 @@ class Main extends React.Component{
     .then(response => {
       response.json().then(jsonResponse => {
         if(jsonResponse.status === 'HTTP1.0 200 OK'){
-          console.log(jsonResponse)
           let newOrder = {
             id: jsonResponse.newOrderId,
             type: type,
@@ -99,7 +96,6 @@ class Main extends React.Component{
             subject: subject,
             amount: amount
           }
-          console.log(newOrder)
           this.createNewRecord(newOrder);
         }
         else{

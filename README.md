@@ -1,3 +1,7 @@
+The project requires:
+- Database in mysql (an empty db is located in this project as 'wallety.sql')
+- Specify server constants in server.js (database host, name, user and pass, and jwtKey)
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
